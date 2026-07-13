@@ -5,8 +5,7 @@
 1. 显式传入的 ``path``（测试用）；
 2. 环境变量 ``REDSHIFT_MCP_PLDEMO_CONFIG`` 指向的文件（不重新 build wheel 就想换配置时用）；
 3. 默认约定：插件包目录内的 ``config.yaml``（``Path(__file__).parent / "config.yaml"``）——
-   dev 下是源码树里开发者自建的（gitignored）；生产下是 build 时打进 wheel 的真实配置
-   （默认路径即命中、无需 env var）。
+   真实配置随包入库（dev/生产同一份），build 时打进 wheel，默认路径即命中、无需 env var。
 
 都找不到 → 抛 ``FileNotFoundError``（含期望路径 + 修复指引），**不回落范本**；由
 ``register`` 上层的 ``load_plugins`` try/except 隔离、记日志、跳过本插件注册，不搞崩 server。
