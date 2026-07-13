@@ -34,6 +34,8 @@ def run_query(
         with conn.cursor() as cur:
             cur.execute(sql, {"event_date": event_date, "limit": max_rows + 1})
             rows = cur.fetchall()
+            # 列名在 cursor 关闭前取（description 为 None 时给空列表）。
+            columns = [d[0] for d in cur.description] if cur.description else []
     elapsed_ms = int((time.monotonic() - t0) * 1000)
 
     truncated = len(rows) > max_rows
@@ -48,5 +50,6 @@ def run_query(
     return {
         "count": len(rows),
         "truncated": truncated,
+        "columns": columns,
         "rows": rows,
     }
