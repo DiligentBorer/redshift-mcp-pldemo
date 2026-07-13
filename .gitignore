@@ -1,0 +1,35 @@
+# 本仓是正式业务插件：插件自有的真实 config.yaml / queries/*.sql 直接入库
+# （无 *.example.* 模板）。唯一例外见下：standalone runner 的 host 配置含密钥，不入库。
+
+# standalone runner 的 host 格式配置（含连接串 / auth_token 等密钥），本地专用、永不入库
+dev/config.yaml
+
+# Python 构建 / 缓存产物
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# 虚拟环境 / 锁
+.venv/
+venv/
+# 本仓是插件包(以 wheel 装进 host venv),非独立部署物;lock 对生产无用(wheel 按 Requires-Dist
+# 区间解析、不读 lock),且会把 sdk 钉成 host 的 git SHA 与 uv.sources 的 tag 双重维护,故不入库。
+uv.lock
+
+# 测试缓存
+.pytest_cache/
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Claude Code 本地会话 / 规划草稿（不入库）
+.claude/

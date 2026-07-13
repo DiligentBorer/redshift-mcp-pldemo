@@ -1,0 +1,49 @@
+# standalone runner 用的 host 格式配置（结构 = redshift-mcp 的 config.yaml）。
+# 本文件是不含真实密钥的占位模板（入库）。拷贝为 dev/config.yaml 并填实际值后使用；
+# dev/config.yaml 已 gitignore（含连接串 / auth_token 等密钥，永不入库）。
+#
+# 用途：本地起一个「含本 pldemo 插件」的真实 MCP server 连 Redshift 做集成验证（见 README「单独跑」）。
+# 注意：这份只管 host 侧（连接 / 鉴权 / 白名单）；pldemo 插件自有的业务 SQL 走
+# src/redshift_mcp_pldemo/config.yaml 或 REDSHIFT_MCP_PLDEMO_CONFIG，与本文件无关。
+
+database:
+  host: your-cluster.xxxxxx.us-east-1.redshift.amazonaws.com
+  port: 5439
+  dbname: dev
+  user: readonly_user
+  password: ""
+  sslmode: require
+  pool_min_size: 1
+  pool_max_size: 5
+  connect_timeout: 10
+
+server:
+  host: 0.0.0.0
+  port: 8000
+  path: /redshift
+  auth_token: "change-me-to-a-long-random-string"
+
+query:
+  statement_timeout_ms: 60000
+  max_rows: 10000
+  timezone: UTC
+
+plugins:
+  enabled: true
+  disabled: []
+
+logging:
+  level: INFO
+  file: ./logs/redshift-mcp.log
+  max_bytes: 10485760
+  backup_count: 5
+  as_json: false
+  uvicorn_access_log: true
+  sql_audit_level: WARNING
+  sql_audit_file: null
+
+# 通用三件套的表白名单；只验证 pldemo 插件时可留空（pldemo 工具不受白名单限制）。
+tables: []
+
+# 本插件是 Python 插件（entry_points 自动发现），无需在此声明；sql_tools 留空即可。
+sql_tools: []

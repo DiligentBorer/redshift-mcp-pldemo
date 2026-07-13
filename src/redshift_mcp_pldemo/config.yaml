@@ -1,0 +1,8 @@
+# pldemo 插件配置（结构与 host config.yaml 同构）。
+#
+# 解析优先级：env var > 本文件（同目录 config.yaml，gitignored；dev 直接用、生产 build 时打进 wheel）。
+#   设环境变量 REDSHIFT_MCP_PLDEMO_CONFIG 指向真实配置文件可不重新 build 就换配置。
+# 不配置则 pldemo 启动时报错跳过、不注册工具（无静默兜底）。
+#
+# sql 与 sql_file 二选一；sql_file 相对本文件所在目录。
+sql_file: queries/event_api.sql

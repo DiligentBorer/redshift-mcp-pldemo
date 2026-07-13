@@ -1,0 +1,54 @@
+[project]
+name = "redshift-mcp-pldemo"
+version = "0.3.7"
+description = "redshift-mcp 业务插件：Event API IP 命中统计（query_event_api_by_date，公共参考仓）"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+# 生产依赖面只有薄契约层 SDK（import PluginContext 类型），不依赖 host 实现源码。
+# 自带配置加载用 pyyaml + pydantic，独立仓显式声明、不靠 host 传递（SDK 不含它们）。
+# 下限 + 次主版本上限：SDK 主版本内严格向后兼容，故上浮安全、破坏性变更必升主版本。
+dependencies = [
+    "redshift-mcp-sdk>=0.3,<1.0",
+    "pyyaml>=6",
+    "pydantic>=2",
+]
+
+[project.optional-dependencies]
+# 仅本地 standalone runner 用（起一个含本插件的真实 MCP server 做集成验证）；
+# 不进生产依赖面。生产运行期 host 已装好，无需插件再拉 host。
+standalone = ["redshift-mcp"]
+
+# 声明 entry-point，让 host 通过 importlib.metadata 自动发现本插件。
+# group 字符串写死（不 import SDK 的 GROUP 常量），值 "<import_pkg>:register" 直指 register 函数。
+[project.entry-points."redshift_mcp.plugins"]
+pldemo = "redshift_mcp_pldemo:register"
+
+# [tool.uv.sources] 是 uv 专属、只作用开发期解析，不写进 build 出的 wheel 元数据：
+# uv sync 时据此从公开 Git 仓按 tag 拉 SDK（standalone extra 时连 host 一起拉）本地构建。
+# 生产 wheel 的 Requires-Dist 只有 redshift-mcp-sdk —— 在 host venv 里 SDK 已随 host 装好，
+# 依赖天然满足，无需 git 拉取。迁到私有 PyPI 时删掉本段、代码零改动即可。
+[tool.uv.sources]
+redshift-mcp-sdk = { git = "ssh://git@github.com/DiligentBorer/redshift-mcp.git", tag = "v0.3.7", subdirectory = "sdk" }
+redshift-mcp = { git = "ssh://git@github.com/DiligentBorer/redshift-mcp.git", tag = "v0.3.7" }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# 打包模型：真实 config.yaml / queries/*.sql 已入库（公共参考仓、无 *.example.* 模板），
+# 作为包目录下的普通 tracked 文件被 hatchling 默认纳入 sdist 与 wheel —— 生产即装即用、
+# 默认路径（<包目录>/config.yaml）即命中，连 env var 都不必。无需 artifacts / exclude 特例。
+[tool.hatch.build.targets.wheel]
+packages = ["src/redshift_mcp_pldemo"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.0",
+    "pytest-asyncio>=1.4.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
